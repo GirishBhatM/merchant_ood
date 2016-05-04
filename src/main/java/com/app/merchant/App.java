@@ -1,7 +1,8 @@
 package com.app.merchant;
 
 import com.app.merchant.exception.MerchantApplicationException;
-import com.app.merchant.parser.InputFileParser;
+import com.app.merchant.parser.Parser;
+import com.app.merchant.parser.TextFileParser;
 import com.app.merchant.utility.ValidationUtility;
 
 /**
@@ -23,7 +24,7 @@ public class App
 		{
 			throw new MerchantApplicationException("Input file path is empty");
 		}
-		InputFileParser inputParser = new InputFileParser();
+		Parser inputParser = new TextFileParser();
 		try
 		{
 			MerchantManager manager = inputParser.parse(filePath);

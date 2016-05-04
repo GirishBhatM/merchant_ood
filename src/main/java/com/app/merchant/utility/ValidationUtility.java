@@ -28,4 +28,19 @@ public class ValidationUtility
 	{
 		return paramters == null || paramters.length == 0;
 	}
+
+	public boolean isTextFile(String filePath)
+	{
+		if (this.isNullOrEmpty(filePath))
+		{
+			return false;
+		}
+		int lastIndex = filePath.lastIndexOf(".");
+		if (lastIndex == -1 || lastIndex == filePath.length() - 1)
+		{
+			return false;
+		}
+		String extension = filePath.substring(lastIndex + 1);
+		return "txt".equals(extension);
+	}
 }

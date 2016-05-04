@@ -37,4 +37,13 @@ public class ValidationUtilityTest
 		Assert.assertTrue(!ValidationUtility.getInstance().isNullOrEmpty(parameters));
 	}
 
+	@Test
+	public void testIsTextFile()
+	{
+		String filePath = null;
+		Assert.assertFalse(ValidationUtility.getInstance().isTextFile(filePath));
+		filePath = "D:\\temp\\input.txt";
+		Assert.assertTrue(ValidationUtility.getInstance().isTextFile(filePath));
+	}
+
 }

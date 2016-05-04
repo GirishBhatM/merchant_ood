@@ -9,7 +9,7 @@ import com.app.merchant.internal.InputType;
 
 public class InputparserTest
 {
-	private static final InputFileParser parser = new InputFileParser();
+	private static final TextFileParser parser = new TextFileParser();
 
 	@Test(expected = ParserException.class)
 	public void testParseForException()
