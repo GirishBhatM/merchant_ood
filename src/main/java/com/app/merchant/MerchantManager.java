@@ -1,11 +1,11 @@
-package com.app.merchant.api.service;
+package com.app.merchant;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.app.merchant.api.internal.RomanToIntegerConverter;
+import com.app.merchant.internal.RomanToIntegerConverter;
 
 public class MerchantManager
 {
@@ -53,11 +53,11 @@ public class MerchantManager
 		String romanString = "";
 		for (String tx : transactions)
 		{
-			if (!this.symbolToRomanMap.keySet().contains(tx))
+			if (!this.getSymbolToRomanMap().keySet().contains(tx))
 			{
 				return 0;
 			}
-			romanString = romanString + this.symbolToRomanMap.get(tx);
+			romanString = romanString + this.getSymbolToRomanMap().get(tx);
 		}
 		value = RomanToIntegerConverter.getInstance().convert(romanString);
 		return value;

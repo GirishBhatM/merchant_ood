@@ -1,4 +1,4 @@
-package com.app.merchant.api.internal;
+package com.app.merchant.parser;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.app.merchant.api.exception.MerchantApplicationException;
-import com.app.merchant.api.service.MerchantManager;
+import com.app.merchant.MerchantManager;
+import com.app.merchant.exception.ParserException;
+import com.app.merchant.internal.InputType;
+import com.app.merchant.utility.ValidationUtility;
 
 /**
  * Class responsible for parsing the input file and updates the {@link MerchantManager} with the input data.
@@ -18,7 +20,7 @@ import com.app.merchant.api.service.MerchantManager;
  * @author girishbhat.m7@gmail.com
  *
  */
-public class InputParser
+public class InputFileParser implements Parser
 {
 	private static String WORD_TO_ROMAN_REGX = "^([a-z]+) is ([I|V|X|L|C|D|M])$";
 	private static String CREDITS_REGEX = "((?:[a-z]+ )+)([A-Z]\\w+) is (\\d+) ([A-Z]\\w+)$";
@@ -26,23 +28,17 @@ public class InputParser
 	private static String QUESTION_HOWMUCH_REGEX = "^how much is ((?:\\w+[^0-9] )+)\\?$";
 	private static String UNKNOWN_RESPONSE = "I have no idea what you are talking about";
 
-	/**
-	 * 
-	 * @param filePath--input
-	 *            file path
-	 * @return--Returns {@link MerchantManager} containing parsed data
-	 * @throws MerchantApplicationException
-	 */
-	public MerchantManager parse(String filePath) throws MerchantApplicationException
+	@Override
+	public MerchantManager parse(String filePath) throws ParserException
 	{
-		if (filePath == null | filePath.trim().length() == 0)
+		if (ValidationUtility.getInstance().isNullOrEmpty(filePath))
 		{
-			throw new MerchantApplicationException("Illegal Argument.File path is empty " + filePath);
+			throw new ParserException("Illegal Argument.File path is empty " + filePath);
 		}
 		File file = new File(filePath);
 		if (!file.exists())
 		{
-			throw new MerchantApplicationException("Input file doesn't exists.");
+			throw new ParserException("Input file doesn't exists. " + filePath);
 		}
 		MerchantManager manager = new MerchantManager();
 		try (BufferedReader br = new BufferedReader(new FileReader(file)))
@@ -60,10 +56,10 @@ public class InputParser
 						this.parseWordToCredits(manager, inputLine);
 						break;
 					case QUESTION_HOWMUCH:
-						manager.getOutput().add(inputLine);
+						this.parseQuestionHowMuch(manager, inputLine);
 						break;
 					case QUESTION_HOWMANY:
-						manager.getOutput().add(inputLine);
+						this.parseQuestionHowMany(manager, inputLine);
 						break;
 					case UNKNOWN:
 						manager.getOutput().add(UNKNOWN_RESPONSE);
@@ -76,7 +72,7 @@ public class InputParser
 			}
 		} catch (IOException e)
 		{
-			throw new MerchantApplicationException("Error occured while reading the file.");
+			throw new ParserException("Error occured while reading the file.");
 		}
 		return manager;
 	}
@@ -157,8 +153,61 @@ public class InputParser
 		String element = matcher.group(2);
 		int credits = Integer.parseInt(matcher.group(3).trim());
 		int transValue = manager.getValueForTransactions(transactions);
-		double value = credits / transValue;
+		double value = credits / (float) transValue;
 		manager.getSymbolToDecimalMap().put(element, value);
 	}
 
+	/**
+	 * Populates the {@link MerchantManager.output}
+	 * 
+	 * @param manager--{@link
+	 *            MerchantManager}
+	 * @param line
+	 */
+	protected void parseQuestionHowMuch(MerchantManager manager, String line)
+	{
+		Pattern pattern = Pattern.compile(QUESTION_HOWMUCH_REGEX);
+		Matcher matcher = pattern.matcher(line);
+		matcher.matches();
+		String[] transactions = matcher.group(1).split(" ");
+		int transValue = manager.getValueForTransactions(transactions);
+		if (transValue != 0)
+		{
+			manager.getOutput().add(matcher.group(1) + " is " + transValue);
+		}
+		else
+		{
+			manager.getOutput().add(UNKNOWN_RESPONSE);
+		}
+	}
+
+	/**
+	 * Populates the {@link MerchantManager.output}
+	 * 
+	 * @param manager--{@link
+	 *            MerchantManager}
+	 * @param line
+	 */
+	protected void parseQuestionHowMany(MerchantManager manager, String line)
+	{
+		Pattern pattern = Pattern.compile(QUESTION_HOWMANY_REGX);
+		Matcher matcher = pattern.matcher(line);
+		matcher.matches();
+		String[] transactions = matcher.group(2).split(" ");
+		int transValue = manager.getValueForTransactions(transactions);
+		if (transValue == 0)
+		{
+			manager.getOutput().add(UNKNOWN_RESPONSE);
+			return;
+		}
+		String element = matcher.group(3).trim();
+		Double value = manager.getSymbolToDecimalMap().get(element);
+		if (value == null)
+		{
+			manager.getOutput().add(UNKNOWN_RESPONSE);
+			return;
+		}
+		Double total = transValue * value;
+		manager.getOutput().add(matcher.group(2) + " " + element + " is " + total + " " + matcher.group(1));
+	}
 }

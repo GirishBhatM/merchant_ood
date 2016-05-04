@@ -1,4 +1,4 @@
-package com.app.merchant.api.exception;
+package com.app.merchant.exception;
 
 /**
  * A root exception class for the application. All other kind of application needs to subclass this. If exception is not

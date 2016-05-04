@@ -1,4 +1,4 @@
-package com.app.merchant.api.internal;
+package com.app.merchant.internal;
 
 public enum InputType
 {

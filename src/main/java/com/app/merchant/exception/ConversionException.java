@@ -1,4 +1,4 @@
-package com.app.merchant.api.exception;
+package com.app.merchant.exception;
 
 /**
  * Exception category for non parsepable or un recognized Roman literal, which cannot be parsed.

@@ -1,6 +1,7 @@
-package com.app.merchant.api.internal;
+package com.app.merchant.internal;
 
-import com.app.merchant.api.exception.ConversionException;
+import com.app.merchant.exception.ConversionException;
+import com.app.merchant.utility.ValidationUtility;
 
 /**
  * A singleton class which is needs to have one instance per application.
@@ -37,28 +38,29 @@ public class RomanToIntegerConverter
 			throw new ConversionException("Symbol is undefined " + symbol);
 		}
 		Integer value = 0;
+		symbol = Character.toUpperCase(symbol);
 		switch (symbol)
 		{
 			case 'I':
-				value = Roman.I.getValue();
+				value = RomanLiteral.I.getValue();
 				break;
 			case 'V':
-				value = Roman.V.getValue();
+				value = RomanLiteral.V.getValue();
 				break;
 			case 'X':
-				value = Roman.X.getValue();
+				value = RomanLiteral.X.getValue();
 				break;
 			case 'L':
-				value = Roman.L.getValue();
+				value = RomanLiteral.L.getValue();
 				break;
 			case 'C':
-				value = Roman.C.getValue();
+				value = RomanLiteral.C.getValue();
 				break;
 			case 'D':
-				value = Roman.D.getValue();
+				value = RomanLiteral.D.getValue();
 				break;
 			case 'M':
-				value = Roman.M.getValue();
+				value = RomanLiteral.M.getValue();
 				break;
 			default:
 				value = 0;
@@ -71,8 +73,18 @@ public class RomanToIntegerConverter
 		return value;
 	}
 
+	/**
+	 * Converts given roman string into equivalent int value
+	 * 
+	 * @param romanString
+	 * @return equivalent int value, returns 0 if null or empty
+	 */
 	public Integer convert(String romanString)
 	{
+		if (ValidationUtility.getInstance().isNullOrEmpty(romanString))
+		{
+			return 0;
+		}
 		int total = 0;
 		int prev = 0;
 		for (int i = romanString.length() - 1; i >= 0; i--)
